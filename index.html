@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YT WatchBoost — MultiView Engine</title>
+<title>YT WatchBoost — MultiView Engine v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15,14 +15,14 @@
     --accent2: #00d4ff;
     --accent3: #ffcc00;
     --green: #00ff88;
+    --purple: #9b59ff;
     --text: #e0e8ff;
     --muted: #4a5580;
     --glow: 0 0 20px rgba(255,0,51,0.4);
     --glow2: 0 0 20px rgba(0,212,255,0.4);
+    --glow3: 0 0 20px rgba(155,89,255,0.4);
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     background: var(--bg);
     color: var(--text);
@@ -30,8 +30,6 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* Animated grid background */
   body::before {
     content: '';
     position: fixed;
@@ -43,7 +41,6 @@
     pointer-events: none;
     z-index: 0;
   }
-
   .scanline {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -59,44 +56,57 @@
   header {
     position: relative;
     z-index: 10;
-    padding: 18px 30px;
+    padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border);
-    background: rgba(5,8,16,0.9);
+    background: rgba(5,8,16,0.95);
     backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+    gap: 10px;
   }
-
   .logo {
     font-family: 'Orbitron', monospace;
     font-weight: 900;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .logo span:first-child { color: var(--accent); }
-  .logo span:last-child { color: var(--accent2); }
-
+  .logo span:nth-child(1) { color: var(--accent); }
+  .logo span:nth-child(2) { color: var(--accent2); }
+  .logo span:nth-child(3) { color: var(--accent3); }
+  .logo-badge {
+    font-size: 0.5rem;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
   .status-bar {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    flex-wrap: wrap;
   }
-
   .stat-pill {
     background: var(--card);
     border: 1px solid var(--border);
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 4px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
   }
   .stat-pill .label { color: var(--muted); }
   .stat-pill .value { color: var(--green); font-weight: 700; }
-
   .dot-live {
     width: 8px; height: 8px;
     border-radius: 50%;
@@ -114,7 +124,7 @@
     z-index: 5;
     display: grid;
     grid-template-columns: 320px 1fr;
-    height: calc(100vh - 65px);
+    height: calc(100vh - 62px);
   }
 
   /* SIDEBAR */
@@ -122,19 +132,18 @@
     background: var(--panel);
     border-right: 1px solid var(--border);
     overflow-y: auto;
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
   }
-
   .sidebar::-webkit-scrollbar { width: 4px; }
   .sidebar::-webkit-scrollbar-track { background: var(--bg); }
   .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   .section-title {
     font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 3px;
     color: var(--accent);
     text-transform: uppercase;
@@ -161,12 +170,12 @@
   }
   .tab-btn {
     flex: 1;
-    padding: 8px;
+    padding: 7px 4px;
     background: transparent;
     border: none;
     color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     cursor: pointer;
     border-radius: 4px;
     transition: all 0.2s;
@@ -181,22 +190,21 @@
   /* INPUTS */
   label {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--muted);
     margin-bottom: 5px;
     font-family: 'Share Tech Mono', monospace;
     letter-spacing: 1px;
   }
-
-  input[type="text"], textarea, select {
+  input[type="text"], input[type="number"], textarea, select {
     width: 100%;
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 10px 12px;
+    padding: 9px 12px;
     border-radius: 4px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
@@ -205,48 +213,40 @@
     box-shadow: var(--glow2);
   }
   textarea { resize: vertical; min-height: 80px; }
+  select option { background: var(--card); }
 
   /* BUTTONS */
   .btn {
-    padding: 10px 16px;
+    padding: 9px 14px;
     border: none;
     border-radius: 4px;
     font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
     width: 100%;
   }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: var(--glow);
-  }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: var(--glow); }
   .btn-primary:hover { background: #ff3355; transform: translateY(-1px); }
-  .btn-secondary {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-  }
+  .btn-secondary { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   .btn-secondary:hover { background: rgba(0,212,255,0.1); box-shadow: var(--glow2); }
-  .btn-success {
-    background: var(--green);
-    color: #000;
-  }
+  .btn-success { background: var(--green); color: #000; }
   .btn-success:hover { filter: brightness(1.1); transform: translateY(-1px); }
-  .btn-sm {
-    width: auto;
-    padding: 6px 12px;
-    font-size: 0.6rem;
-  }
+  .btn-purple { background: var(--purple); color: #fff; box-shadow: var(--glow3); }
+  .btn-purple:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-warning { background: var(--accent3); color: #000; }
+  .btn-warning:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-sm { width: auto; padding: 5px 12px; font-size: 0.58rem; }
+  .btn-xs { width: auto; padding: 4px 8px; font-size: 0.55rem; }
+  .btn-icon { width: 32px; height: 32px; padding: 0; display:flex;align-items:center;justify-content:center; font-size:0.8rem; border-radius:4px; }
 
   /* GRID SELECTOR */
   .grid-selector {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    gap: 5px;
   }
   .grid-opt {
     aspect-ratio: 1;
@@ -259,190 +259,134 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
     transition: all 0.2s;
-    padding: 8px 4px;
+    padding: 6px 4px;
   }
   .grid-opt:hover { border-color: var(--accent2); color: var(--accent2); }
   .grid-opt.selected { border-color: var(--accent); color: var(--accent); background: rgba(255,0,51,0.08); box-shadow: var(--glow); }
-  .grid-icon {
-    display: grid;
-    gap: 2px;
-    width: 24px; height: 24px;
-  }
-  .grid-icon div {
-    background: currentColor;
-    border-radius: 1px;
-  }
+  .grid-icon { display: grid; gap: 2px; width: 22px; height: 22px; }
+  .grid-icon div { background: currentColor; border-radius: 1px; }
 
   /* VIDEO LIST */
   .video-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    max-height: 200px;
+    gap: 5px;
+    max-height: 180px;
     overflow-y: auto;
   }
   .video-item {
     background: var(--bg);
     border: 1px solid var(--border);
-    padding: 8px 10px;
+    padding: 7px 10px;
     border-radius: 4px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.72rem;
+    gap: 7px;
+    font-size: 0.7rem;
     font-family: 'Share Tech Mono', monospace;
+    transition: border-color 0.2s;
+    cursor: default;
   }
-  .video-item .vid-num {
-    color: var(--accent);
-    font-weight: 700;
-    min-width: 20px;
-  }
-  .video-item .vid-url {
-    flex: 1;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .video-item .vid-remove {
-    color: var(--muted);
-    cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.8rem;
-    background: none;
-    border: none;
-    transition: color 0.2s;
-  }
+  .video-item:hover { border-color: var(--border); }
+  .video-item.dragging { opacity: 0.5; border-color: var(--accent2); }
+  .video-item .vid-drag { color: var(--border); cursor: grab; font-size: 0.9rem; }
+  .video-item .vid-num { color: var(--accent); font-weight: 700; min-width: 18px; }
+  .video-item .vid-url { flex: 1; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .video-item .vid-remove { color: var(--muted); cursor: pointer; padding: 2px 5px; border-radius: 3px; font-size: 0.8rem; background: none; border: none; transition: color 0.2s; }
   .video-item .vid-remove:hover { color: var(--accent); }
 
-  /* SETTINGS */
-  .settings-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  /* THUMBNAIL STRIP */
+  .thumb-strip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 4px 0;
   }
+  .thumb-strip::-webkit-scrollbar { height: 3px; }
+  .thumb-strip::-webkit-scrollbar-thumb { background: var(--border); }
+  .thumb-item {
+    position: relative;
+    flex-shrink: 0;
+    width: 72px;
+    height: 40px;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .thumb-item:hover { border-color: var(--accent2); }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb-item .thumb-rm {
+    position: absolute; top: 1px; right: 1px;
+    background: rgba(0,0,0,0.8); color: var(--accent);
+    border: none; cursor: pointer; border-radius: 2px;
+    font-size: 0.6rem; width: 14px; height: 14px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .thumb-item:hover .thumb-rm { opacity: 1; }
 
+  /* SETTINGS */
+  .settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .toggle-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 7px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 0.75rem;
+    font-size: 0.73rem;
   }
-  .toggle {
-    position: relative;
-    width: 36px; height: 20px;
-    cursor: pointer;
-  }
+  .toggle { position: relative; width: 36px; height: 20px; cursor: pointer; }
   .toggle input { display: none; }
-  .toggle-track {
-    position: absolute;
-    inset: 0;
-    background: var(--border);
-    border-radius: 10px;
-    transition: background 0.2s;
-  }
+  .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 10px; transition: background 0.2s; }
   .toggle input:checked ~ .toggle-track { background: var(--accent); }
-  .toggle-thumb {
-    position: absolute;
-    top: 3px; left: 3px;
-    width: 14px; height: 14px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform 0.2s;
-  }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
   .toggle input:checked ~ .toggle-track .toggle-thumb { transform: translateX(16px); }
 
-  /* VIEWER AREA */
-  .viewer {
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
+  /* VIEWER */
+  .viewer { background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
   .viewer-toolbar {
-    padding: 12px 20px;
+    padding: 10px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
+    flex-wrap: wrap;
+    gap: 8px;
   }
-
-  .toolbar-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
+  .toolbar-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   .watch-timer {
     font-family: 'Orbitron', monospace;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 900;
     color: var(--accent2);
     letter-spacing: 3px;
     text-shadow: var(--glow2);
   }
-
-  .hour-progress {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .progress-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-  .progress-bar {
-    width: 200px;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent3));
-    border-radius: 3px;
-    transition: width 1s ease;
-    width: 0%;
-  }
-  .progress-pct {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--accent3);
-    text-align: right;
-  }
-
-  .toolbar-right {
-    display: flex;
-    gap: 8px;
-  }
+  .hour-progress { display: flex; flex-direction: column; gap: 3px; }
+  .progress-label { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 1px; }
+  .progress-bar { width: 200px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 3px; transition: width 1s ease; width: 0%; }
+  .progress-pct { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; color: var(--accent3); text-align: right; }
+  .toolbar-right { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
   /* VIDEO GRID */
-  .video-grid {
-    flex: 1;
-    display: grid;
-    gap: 4px;
-    padding: 4px;
-    overflow: hidden;
-  }
-
-  .video-grid.g1 { grid-template-columns: 1fr; }
-  .video-grid.g2 { grid-template-columns: 1fr 1fr; }
-  .video-grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
-  .video-grid.g4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-  .video-grid.g6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; }
-  .video-grid.g9 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+  .video-grid { flex: 1; display: grid; gap: 4px; padding: 4px; overflow: hidden; }
+  .video-grid.g1  { grid-template-columns: 1fr; }
+  .video-grid.g2  { grid-template-columns: 1fr 1fr; }
+  .video-grid.g3  { grid-template-columns: 1fr 1fr 1fr; }
+  .video-grid.g4  { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .video-grid.g6  { grid-template-columns: repeat(3,1fr); grid-template-rows: 1fr 1fr; }
+  .video-grid.g9  { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); }
+  .video-grid.g16 { grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(4,1fr); }
+  .video-grid.g25 { grid-template-columns: repeat(5,1fr); grid-template-rows: repeat(5,1fr); }
 
   .vid-cell {
     background: #000;
@@ -450,131 +394,274 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: 4px;
+    transition: border-color 0.2s;
   }
-  .vid-cell iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
+  .vid-cell:hover { border-color: var(--accent2); }
+  .vid-cell iframe { width: 100%; height: 100%; border: none; display: block; }
   .vid-cell-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
     color: var(--muted);
     font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 2px;
   }
-  .vid-cell-placeholder .slot-num {
-    font-size: 2rem;
-    color: var(--border);
-    font-weight: 900;
-  }
+  .slot-num { font-size: 2rem; color: var(--border); font-weight: 900; }
   .vid-label {
-    position: absolute;
-    top: 6px; left: 6px;
-    background: rgba(0,0,0,0.7);
+    position: absolute; top: 6px; left: 6px;
+    background: rgba(0,0,0,0.75);
     border: 1px solid var(--border);
-    padding: 3px 8px;
+    padding: 2px 7px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     color: var(--accent2);
     border-radius: 3px;
-    pointer-events: none;
-    z-index: 2;
+    pointer-events: none; z-index: 2;
   }
+  .vid-overlay-btn {
+    position: absolute; bottom: 6px; right: 6px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    cursor: pointer;
+    padding: 3px 8px;
+    font-size: 0.6rem;
+    font-family: 'Share Tech Mono', monospace;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 3;
+  }
+  .vid-cell:hover .vid-overlay-btn { opacity: 1; }
 
-  /* NOTIFICATIONS */
-  .toast {
+  /* TOAST */
+  .toast-container {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 20px; right: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 1000;
+  }
+  .toast {
     background: var(--card);
     border: 1px solid var(--accent2);
     box-shadow: var(--glow2);
-    padding: 14px 20px;
+    padding: 12px 18px;
     border-radius: 6px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--accent2);
-    z-index: 1000;
-    transform: translateY(100px);
+    transform: translateX(120px);
     opacity: 0;
     transition: all 0.3s ease;
+    min-width: 200px;
   }
-  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.show { transform: translateX(0); opacity: 1; }
 
-  /* STATS PANEL */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
   .stat-card {
     background: var(--bg);
     border: 1px solid var(--border);
-    padding: 10px;
+    padding: 9px;
     border-radius: 4px;
     text-align: center;
   }
-  .stat-card .s-val {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--accent2);
-  }
-  .stat-card .s-lab {
-    font-size: 0.6rem;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    letter-spacing: 1px;
-    margin-top: 2px;
-  }
+  .stat-card .s-val { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--accent2); }
+  .stat-card .s-lab { font-size: 0.58rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; margin-top: 2px; }
 
-  /* PLAYLIST MODE */
-  .playlist-area {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  /* GOAL EDITOR MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(5,8,16,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
   }
-  .playlist-item {
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--accent2);
+    box-shadow: var(--glow2);
+    border-radius: 8px;
+    padding: 28px;
+    width: 380px;
+    max-width: 90vw;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .modal-row { margin-bottom: 14px; }
+  .modal-footer { display: flex; gap: 8px; margin-top: 20px; }
+  .modal-footer .btn { flex: 1; }
+
+  /* SCHEDULE PANEL */
+  .schedule-list {
+    display: flex; flex-direction: column; gap: 5px;
+    max-height: 140px; overflow-y: auto;
+  }
+  .schedule-item {
     background: var(--bg);
     border: 1px solid var(--border);
-    padding: 8px 12px;
+    padding: 7px 10px;
     border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: grab;
-    transition: border-color 0.2s;
-    font-size: 0.72rem;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.68rem;
     font-family: 'Share Tech Mono', monospace;
   }
-  .playlist-item:hover { border-color: var(--accent2); }
-  .playlist-item .pi-idx { color: var(--accent3); font-weight: 700; min-width: 24px; }
-  .playlist-item .pi-url { flex: 1; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .playlist-item .pi-status { color: var(--green); font-size: 0.65rem; }
+  .schedule-item .sch-time { color: var(--accent3); min-width: 50px; font-weight: 700; }
+  .schedule-item .sch-action { flex: 1; color: var(--muted); }
+  .schedule-item .sch-rm { color: var(--muted); cursor: pointer; background: none; border: none; }
+  .schedule-item .sch-rm:hover { color: var(--accent); }
 
-  .hidden { display: none !important; }
+  /* SPEED DIAL */
+  .speed-ring {
+    display: flex; gap: 5px; align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+  }
+  .speed-btn {
+    padding: 4px 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    transition: all 0.2s;
+  }
+  .speed-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .speed-btn:hover { border-color: var(--accent2); color: var(--accent2); }
 
-  /* Loading overlay */
-  .loading-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(5,8,16,0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+  /* NOTES */
+  .notes-area {
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 4px;
+    padding: 8px;
+    min-height: 80px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .notes-area:focus { border-color: var(--accent2); }
+
+  /* SESSION LOG */
+  .session-log {
+    display: flex; flex-direction: column; gap: 4px;
+    max-height: 100px; overflow-y: auto;
+  }
+  .log-entry {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    padding: 3px 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    display: flex; gap: 8px;
+  }
+  .log-entry .log-time { color: var(--accent3); min-width: 50px; }
+  .log-entry .log-msg { flex: 1; }
+
+  /* CHART */
+  .mini-chart {
+    width: 100%;
+    height: 60px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .mini-chart canvas { width: 100%; height: 100%; }
+
+  /* KEYBOARD SHORTCUTS */
+  .shortcut-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    font-size: 0.65rem;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .kbd {
+    background: var(--border);
+    color: var(--accent3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .shortcut-desc { color: var(--muted); line-height: 1.4; }
+
+  /* FULLSCREEN VIEWER */
+  .fullscreen-overlay {
+    position: fixed; inset: 0;
+    background: #000;
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+  }
+  .fullscreen-overlay.show { display: flex; }
+  .fs-exit {
+    position: fixed; top: 10px; right: 10px;
+    z-index: 201;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    cursor: pointer;
+    padding: 6px 14px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+  .fs-grid { flex: 1; display: grid; gap: 3px; padding: 3px; }
+
+  /* TAG COLORS for themes */
+  .theme-red   { --accent: #ff0033; }
+  .theme-blue  { --accent: #0099ff; }
+  .theme-green { --accent: #00cc55; }
+  .theme-gold  { --accent: #ffaa00; }
+  .theme-purple{ --accent: #9b59ff; }
+
+  /* COLOR THEME ROW */
+  .theme-row { display: flex; gap: 8px; align-items: center; }
+  .theme-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .theme-dot.active { border-color: #fff; transform: scale(1.2); }
+
+  /* MISC */
+  .hidden { display: none !important; }
+  .flex-row { display: flex; gap: 6px; align-items: center; }
+  .loading-overlay {
+    position: absolute; inset: 0;
+    background: rgba(5,8,16,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; border-radius: 4px;
   }
   .spinner {
-    width: 30px; height: 30px;
+    width: 28px; height: 28px;
     border: 2px solid var(--border);
     border-top-color: var(--accent2);
     border-radius: 50%;
@@ -582,21 +669,138 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* BADGE */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--accent); color: #fff;
+    border-radius: 10px; font-size: 0.55rem;
+    padding: 1px 6px; font-family: 'Share Tech Mono', monospace;
+    min-width: 18px; height: 16px;
+  }
+  .badge.green { background: var(--green); color: #000; }
+  .badge.yellow { background: var(--accent3); color: #000; }
+
+  /* MILESTONES */
+  .milestone-list { display: flex; flex-direction: column; gap: 5px; }
+  .milestone-item {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.67rem;
+    padding: 5px 8px; border-radius: 3px;
+    border: 1px solid var(--border); background: var(--bg);
+  }
+  .milestone-item.achieved { border-color: var(--green); }
+  .milestone-item .ms-check { font-size: 0.75rem; }
+  .milestone-item .ms-label { flex: 1; color: var(--muted); }
+  .milestone-item.achieved .ms-label { color: var(--green); }
+  .milestone-item .ms-hours { color: var(--accent3); }
+
   /* Responsive */
   @media (max-width: 768px) {
     .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
     .sidebar { height: auto; max-height: 45vh; }
     .status-bar { display: none; }
+    .progress-bar { width: 140px; }
   }
+
+  /* SCROLLBAR for session log */
+  .session-log::-webkit-scrollbar { width: 3px; }
+  .session-log::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* GLOWING LAUNCH BUTTON */
+  #launch-btn {
+    animation: glowPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%,100% { box-shadow: 0 0 6px rgba(0,255,136,0.4); }
+    50% { box-shadow: 0 0 18px rgba(0,255,136,0.8); }
+  }
+  #launch-btn:hover { animation: none; }
+
+  /* SPEED LABEL */
+  .speed-label { color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; }
 </style>
 </head>
 <body>
 
 <div class="scanline"></div>
 
+<!-- FULLSCREEN OVERLAY -->
+<div class="fullscreen-overlay" id="fs-overlay">
+  <button class="fs-exit" onclick="exitFullscreen()">✕ EXIT FULLSCREEN</button>
+  <div class="fs-grid" id="fs-grid"></div>
+</div>
+
+<!-- GOAL EDITOR MODAL -->
+<div class="modal-overlay" id="goal-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">🎯 CUSTOMIZE GOAL</div>
+    <div class="modal-row">
+      <label>Watch Hour Goal</label>
+      <input type="number" id="goal-input" value="4000" min="1" max="99999">
+    </div>
+    <div class="modal-row">
+      <label>Goal Label (optional)</label>
+      <input type="text" id="goal-label-input" placeholder="e.g. YPP Monetization Goal">
+    </div>
+    <div class="modal-row">
+      <label>Manually Adjust Hours Banked</label>
+      <input type="number" id="hours-adjust" placeholder="Saved hours override" step="0.01">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeGoalModal()">CANCEL</button>
+      <button class="btn btn-primary" onclick="saveGoal()">SAVE GOAL</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE MODAL -->
+<div class="modal-overlay" id="schedule-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">⏰ ADD SCHEDULE</div>
+    <div class="modal-row">
+      <label>Time (HH:MM)</label>
+      <input type="text" id="sch-time-input" placeholder="e.g. 22:00">
+    </div>
+    <div class="modal-row">
+      <label>Action</label>
+      <select id="sch-action-input">
+        <option value="start">Auto-Start Session</option>
+        <option value="stop">Auto-Stop Session</option>
+        <option value="rotate">Rotate Videos</option>
+        <option value="refresh">Refresh All</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeScheduleModal()">CANCEL</button>
+      <button class="btn btn-primary" onclick="addSchedule()">ADD</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="export-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">📤 EXPORT / IMPORT</div>
+    <div class="modal-row">
+      <label>Export Video List (JSON)</label>
+      <textarea id="export-area" rows="5" readonly style="font-size:0.65rem;"></textarea>
+    </div>
+    <div class="modal-row">
+      <label>Import (paste JSON)</label>
+      <textarea id="import-area" rows="3" placeholder='["videoId1","videoId2",...]'></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('export-modal').classList.remove('show')">CLOSE</button>
+      <button class="btn btn-warning" onclick="copyExport()">COPY</button>
+      <button class="btn btn-primary" onclick="importVideos()">IMPORT</button>
+    </div>
+  </div>
+</div>
+
 <header>
   <div class="logo">
-    <span>YT</span><span>WATCH</span><span style="color:var(--accent3)">BOOST</span>
+    <span>YT</span><span>WATCH</span><span>BOOST</span>
+    <span class="logo-badge">v2</span>
   </div>
   <div class="status-bar">
     <div class="stat-pill">
@@ -613,8 +817,17 @@
       <span class="value" id="hdr-watchtime">0 MIN</span>
     </div>
     <div class="stat-pill">
-      <span class="label">TO 4000H</span>
-      <span class="value" id="hdr-remaining">4000:00</span>
+      <span class="label">REMAINING</span>
+      <span class="value" id="hdr-remaining">—</span>
+    </div>
+    <div class="stat-pill">
+      <span class="label">ETA</span>
+      <span class="value" id="hdr-eta">—</span>
+    </div>
+    <div style="display:flex;gap:5px;">
+      <button class="btn btn-secondary btn-xs" onclick="openGoalModal()" title="Edit Goal">🎯</button>
+      <button class="btn btn-secondary btn-xs" onclick="openExportModal()" title="Export/Import">📤</button>
+      <button class="btn btn-secondary btn-xs" onclick="toggleFullscreen()" title="Fullscreen Viewer">⛶</button>
     </div>
   </div>
 </header>
@@ -629,40 +842,63 @@
       <div class="tab-row">
         <button class="tab-btn active" onclick="setMode('manual')" id="tab-manual">MANUAL</button>
         <button class="tab-btn" onclick="setMode('playlist')" id="tab-playlist">PLAYLIST</button>
-        <button class="tab-btn" onclick="setMode('channel')" id="tab-channel">CHANNEL</button>
+        <button class="tab-btn" onclick="setMode('channel')" id="tab-channel">BULK</button>
+        <button class="tab-btn" onclick="setMode('schedule')" id="tab-schedule">SCHED</button>
       </div>
     </div>
 
     <!-- MANUAL MODE -->
     <div id="mode-manual">
       <div class="section-title">📹 Video URLs</div>
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <div class="flex-row" style="margin-bottom:7px;">
         <input type="text" id="url-input" placeholder="YouTube URL or video ID..." style="flex:1;">
         <button class="btn btn-secondary btn-sm" onclick="addVideoURL()">ADD</button>
       </div>
+      <!-- THUMBNAIL STRIP -->
+      <div class="thumb-strip" id="thumb-strip" style="margin-bottom:7px;"></div>
       <div class="video-list" id="video-list">
-        <div style="color:var(--muted);font-size:0.7rem;font-family:'Share Tech Mono',monospace;text-align:center;padding:20px 0;">
+        <div style="color:var(--muted);font-size:0.68rem;font-family:'Share Tech Mono',monospace;text-align:center;padding:16px 0;">
           No videos added yet
         </div>
       </div>
-      <button class="btn btn-secondary" style="margin-top:8px;" onclick="clearVideos()">CLEAR ALL</button>
+      <div class="flex-row" style="margin-top:8px;">
+        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="clearVideos()">🗑 CLEAR</button>
+        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="shuffleVideos()">🔀 SHUFFLE</button>
+        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="openExportModal()">📤 EXPORT</button>
+      </div>
     </div>
 
     <!-- PLAYLIST MODE -->
     <div id="mode-playlist" class="hidden">
-      <div class="section-title">📋 Playlist ID</div>
+      <div class="section-title">📋 Playlist</div>
       <label>YouTube Playlist URL or ID</label>
-      <input type="text" id="playlist-input" placeholder="PLxxxxxxxxxxxxxx or playlist URL">
+      <input type="text" id="playlist-input" placeholder="PLxxxxxx or playlist URL">
       <button class="btn btn-primary" style="margin-top:8px;" onclick="loadPlaylist()">LOAD PLAYLIST</button>
-      <div id="playlist-preview" style="margin-top:12px;"></div>
+      <div id="playlist-preview" style="margin-top:10px;"></div>
     </div>
 
-    <!-- CHANNEL MODE -->
+    <!-- BULK/CHANNEL MODE -->
     <div id="mode-channel" class="hidden">
-      <div class="section-title">📡 Channel Videos</div>
+      <div class="section-title">📡 Bulk Load</div>
       <label>Paste multiple URLs (one per line)</label>
-      <textarea id="channel-input" placeholder="https://youtu.be/xxxxx&#10;https://youtu.be/yyyyy&#10;https://youtu.be/zzzzz&#10;..."></textarea>
+      <textarea id="channel-input" placeholder="https://youtu.be/xxxxx&#10;https://youtu.be/yyyyy&#10;..."></textarea>
       <button class="btn btn-primary" style="margin-top:8px;" onclick="loadChannelURLs()">LOAD VIDEOS</button>
+    </div>
+
+    <!-- SCHEDULE MODE -->
+    <div id="mode-schedule" class="hidden">
+      <div class="section-title">⏰ Auto-Schedule</div>
+      <div class="flex-row" style="margin-bottom:8px;">
+        <span style="font-family:'Share Tech Mono';font-size:0.68rem;color:var(--muted);flex:1;">Schedule timed actions</span>
+        <button class="btn btn-secondary btn-xs" onclick="openScheduleModal()">+ ADD</button>
+      </div>
+      <div class="schedule-list" id="schedule-list">
+        <div style="color:var(--muted);font-size:0.68rem;font-family:'Share Tech Mono',monospace;text-align:center;padding:12px 0;">No schedules set</div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="section-title" style="margin-bottom:8px;">💡 Notes</div>
+        <textarea class="notes-area" id="user-notes" placeholder="Session notes, goals, reminders..." oninput="saveNotes()"></textarea>
+      </div>
     </div>
 
     <!-- GRID LAYOUT -->
@@ -670,40 +906,28 @@
       <div class="section-title">🎛️ Grid Layout</div>
       <div class="grid-selector">
         <div class="grid-opt selected" onclick="setGrid(1)" id="g1">
-          <div class="grid-icon" style="grid-template-columns:1fr;">
-            <div></div>
-          </div>
-          1×1
+          <div class="grid-icon" style="grid-template-columns:1fr;"><div></div></div>1×1
         </div>
         <div class="grid-opt" onclick="setGrid(2)" id="g2">
-          <div class="grid-icon" style="grid-template-columns:1fr 1fr;">
-            <div></div><div></div>
-          </div>
-          1×2
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr;"><div></div><div></div></div>1×2
         </div>
         <div class="grid-opt" onclick="setGrid(4)" id="g4">
-          <div class="grid-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;">
-            <div></div><div></div><div></div><div></div>
-          </div>
-          2×2
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;"><div></div><div></div><div></div><div></div></div>2×2
         </div>
         <div class="grid-opt" onclick="setGrid(6)" id="g6">
-          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;">
-            <div></div><div></div><div></div><div></div><div></div><div></div>
-          </div>
-          2×3
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;"><div></div><div></div><div></div><div></div><div></div><div></div></div>2×3
         </div>
         <div class="grid-opt" onclick="setGrid(9)" id="g9">
-          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;">
-            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-          </div>
-          3×3
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>3×3
         </div>
         <div class="grid-opt" onclick="setGrid(3)" id="g3">
-          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;">
-            <div></div><div></div><div></div>
-          </div>
-          1×3
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;"><div></div><div></div><div></div></div>1×3
+        </div>
+        <div class="grid-opt" onclick="setGrid(16)" id="g16">
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr 1fr;"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>4×4
+        </div>
+        <div class="grid-opt" onclick="setGrid(25)" id="g25">
+          <div class="grid-icon" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>5×5
         </div>
       </div>
     </div>
@@ -727,11 +951,19 @@
         <span>Auto Rotate</span>
         <label class="toggle"><input type="checkbox" id="tog-rotate"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
       </div>
-      <div style="margin-top:10px;">
-        <label>Rotate Interval (minutes)</label>
-        <input type="text" id="rotate-interval" value="30" placeholder="30">
+      <div class="toggle-row">
+        <span>Show Labels</span>
+        <label class="toggle"><input type="checkbox" id="tog-labels" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+      </div>
+      <div class="toggle-row">
+        <span>Dark Grid Gap</span>
+        <label class="toggle"><input type="checkbox" id="tog-darkgap" onchange="toggleDarkGap()"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
       </div>
       <div style="margin-top:10px;">
+        <label>Rotate Interval (minutes)</label>
+        <input type="number" id="rotate-interval" value="30" placeholder="30" min="1">
+      </div>
+      <div style="margin-top:8px;">
         <label>Quality Preference</label>
         <select id="quality-select">
           <option value="hd1080">1080p HD</option>
@@ -741,6 +973,23 @@
           <option value="small">240p (fastest)</option>
         </select>
       </div>
+      <div style="margin-top:8px;">
+        <label>Accent Theme</label>
+        <div class="theme-row">
+          <div class="theme-dot active" style="background:#ff0033;" onclick="setTheme('#ff0033',this)" title="Red"></div>
+          <div class="theme-dot" style="background:#0099ff;" onclick="setTheme('#0099ff',this)" title="Blue"></div>
+          <div class="theme-dot" style="background:#00cc55;" onclick="setTheme('#00cc55',this)" title="Green"></div>
+          <div class="theme-dot" style="background:#ffaa00;" onclick="setTheme('#ffaa00',this)" title="Gold"></div>
+          <div class="theme-dot" style="background:#9b59ff;" onclick="setTheme('#9b59ff',this)" title="Purple"></div>
+          <div class="theme-dot" style="background:#ff6ec7;" onclick="setTheme('#ff6ec7',this)" title="Pink"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MILESTONES -->
+    <div>
+      <div class="section-title">🏆 Milestones</div>
+      <div class="milestone-list" id="milestone-list"></div>
     </div>
 
     <!-- STATS -->
@@ -761,15 +1010,49 @@
         </div>
         <div class="stat-card">
           <div class="s-val" id="stat-progress">0%</div>
-          <div class="s-lab">4000H GOAL</div>
+          <div class="s-lab">GOAL %</div>
         </div>
+        <div class="stat-card">
+          <div class="s-val" id="stat-sessions">0</div>
+          <div class="s-lab">SESSIONS</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" id="stat-videos">0</div>
+          <div class="s-lab">VIDEOS</div>
+        </div>
+      </div>
+      <!-- MINI CHART -->
+      <div style="margin-top:8px;">
+        <label>Session History (hours/day)</label>
+        <div class="mini-chart"><canvas id="history-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- SESSION LOG -->
+    <div>
+      <div class="section-title">📋 Activity Log</div>
+      <div class="session-log" id="session-log"></div>
+    </div>
+
+    <!-- KEYBOARD SHORTCUTS -->
+    <div>
+      <div class="section-title">⌨️ Shortcuts</div>
+      <div class="shortcut-grid">
+        <span class="kbd">Space</span><span class="shortcut-desc">Launch / Stop</span>
+        <span class="kbd">F</span><span class="shortcut-desc">Toggle fullscreen</span>
+        <span class="kbd">R</span><span class="shortcut-desc">Refresh all</span>
+        <span class="kbd">M</span><span class="shortcut-desc">Mute toggle</span>
+        <span class="kbd">S</span><span class="shortcut-desc">Shuffle videos</span>
+        <span class="kbd">1–9</span><span class="shortcut-desc">Set grid size</span>
+        <span class="kbd">Esc</span><span class="shortcut-desc">Exit fullscreen</span>
       </div>
     </div>
 
     <!-- LAUNCH -->
     <div>
       <button class="btn btn-success" onclick="launchViewer()" id="launch-btn">▶ LAUNCH VIEWER</button>
-      <button class="btn btn-secondary" style="margin-top:8px;" onclick="stopAll()" id="stop-btn">⏹ STOP ALL</button>
+      <button class="btn btn-secondary" style="margin-top:7px;" onclick="stopAll()" id="stop-btn">⏹ STOP ALL</button>
+      <button class="btn btn-secondary" style="margin-top:7px;" onclick="resetProgress()" id="reset-btn">🔄 RESET PROGRESS</button>
     </div>
 
   </aside>
@@ -780,14 +1063,26 @@
       <div class="toolbar-left">
         <div class="watch-timer" id="watch-timer">00:00:00</div>
         <div class="hour-progress">
-          <div class="progress-label">4000 HOUR GOAL PROGRESS</div>
+          <div class="progress-label" id="goal-label-display">4000 HOUR GOAL PROGRESS</div>
           <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
-          <div class="progress-pct" id="prog-pct">0.00%</div>
+          <div class="progress-pct" id="prog-pct">0.000%</div>
+        </div>
+        <!-- SPEED MULTIPLIER -->
+        <div>
+          <div class="speed-label">SPEED ×</div>
+          <div class="speed-ring" style="margin-top:3px;">
+            <div class="speed-btn active" onclick="setSpeed(1,this)">1×</div>
+            <div class="speed-btn" onclick="setSpeed(2,this)">2×</div>
+            <div class="speed-btn" onclick="setSpeed(4,this)">4×</div>
+            <div class="speed-btn" onclick="setSpeed(8,this)">8×</div>
+          </div>
         </div>
       </div>
       <div class="toolbar-right">
         <button class="btn btn-secondary btn-sm" onclick="muteToggle()">🔇 MUTE</button>
         <button class="btn btn-secondary btn-sm" onclick="refreshAll()">↺ REFRESH</button>
+        <button class="btn btn-secondary btn-sm" onclick="shuffleAndRefresh()">🔀 SHUFFLE</button>
+        <button class="btn btn-purple btn-sm" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
         <button class="btn btn-primary btn-sm" onclick="launchViewer()">▶ START</button>
       </div>
     </div>
@@ -796,68 +1091,102 @@
         <div class="vid-cell-placeholder">
           <div class="slot-num">▶</div>
           <div>ADD VIDEOS & LAUNCH</div>
-          <div style="color:var(--border);font-size:0.6rem;">WATCHBOOST ENGINE READY</div>
+          <div style="color:var(--border);font-size:0.6rem;margin-top:4px;">WATCHBOOST v2 ENGINE READY</div>
+          <div style="color:var(--muted);font-size:0.58rem;margin-top:8px;">PRESS SPACE TO START • F FOR FULLSCREEN</div>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast-container" id="toast-container"></div>
 
 <script>
+  // ═══════════════════════════════════════════════
   // STATE
+  // ═══════════════════════════════════════════════
   let videos = [];
   let gridSize = 1;
   let running = false;
   let sessionSeconds = 0;
   let timerInterval = null;
+  let speedMultiplier = 1;
   let savedHours = parseFloat(localStorage.getItem('wb_total_hours') || '0');
+  let totalSessions = parseInt(localStorage.getItem('wb_sessions') || '0');
   let currentMode = 'manual';
+  let schedules = JSON.parse(localStorage.getItem('wb_schedules') || '[]');
+  let dailyHistory = JSON.parse(localStorage.getItem('wb_daily') || '{}');
+  let GOAL_HOURS = parseFloat(localStorage.getItem('wb_goal') || '4000');
+  let GOAL_LABEL = localStorage.getItem('wb_goal_label') || '4000 HOUR GOAL PROGRESS';
 
-  const GOAL_HOURS = 4000;
+  // Load saved videos
+  try { videos = JSON.parse(localStorage.getItem('wb_videos') || '[]'); } catch(e) { videos = []; }
 
-  // TOAST
-  function toast(msg, color = 'var(--accent2)') {
-    const t = document.getElementById('toast');
-    t.style.borderColor = color;
-    t.style.color = color;
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+  // ═══════════════════════════════════════════════
+  // TOAST SYSTEM (multiple stacked toasts)
+  // ═══════════════════════════════════════════════
+  function toast(msg, color = 'var(--accent2)', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.style.borderColor = color;
+    el.style.color = color;
+    el.textContent = msg;
+    container.appendChild(el);
+    requestAnimationFrame(() => { requestAnimationFrame(() => { el.classList.add('show'); }); });
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 350);
+    }, duration);
   }
 
+  // ═══════════════════════════════════════════════
+  // LOG
+  // ═══════════════════════════════════════════════
+  function addLog(msg) {
+    const log = document.getElementById('session-log');
+    const now = new Date();
+    const t = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="log-time">${t}</span><span class="log-msg">${msg}</span>`;
+    log.insertBefore(entry, log.firstChild);
+    // Keep only 30 entries
+    while (log.children.length > 30) log.removeChild(log.lastChild);
+  }
+
+  // ═══════════════════════════════════════════════
   // MODE SWITCH
+  // ═══════════════════════════════════════════════
   function setMode(mode) {
     currentMode = mode;
-    ['manual','playlist','channel'].forEach(m => {
+    ['manual','playlist','channel','schedule'].forEach(m => {
       document.getElementById('mode-' + m).classList.toggle('hidden', m !== mode);
       document.getElementById('tab-' + m).classList.toggle('active', m === mode);
     });
   }
 
+  // ═══════════════════════════════════════════════
   // EXTRACT VIDEO ID
+  // ═══════════════════════════════════════════════
   function extractVideoId(url) {
     url = url.trim();
     if (!url) return null;
-    // Already an ID
     if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-    // youtu.be
     let m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
     if (m) return m[1];
-    // youtube.com/watch?v=
     m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
     if (m) return m[1];
-    // youtube.com/embed/
     m = url.match(/embed\/([a-zA-Z0-9_-]{11})/);
     if (m) return m[1];
-    // youtube.com/shorts/
     m = url.match(/shorts\/([a-zA-Z0-9_-]{11})/);
     if (m) return m[1];
     return null;
   }
 
-  // ADD VIDEO URL
+  // ═══════════════════════════════════════════════
+  // VIDEO MANAGEMENT
+  // ═══════════════════════════════════════════════
   function addVideoURL() {
     const input = document.getElementById('url-input');
     const id = extractVideoId(input.value);
@@ -865,61 +1194,118 @@
     if (videos.includes(id)) { toast('⚠️ Already added!', 'var(--accent3)'); return; }
     videos.push(id);
     input.value = '';
+    saveVideos();
     renderVideoList();
+    addLog(`Added video: ${id}`);
     toast('✅ Video added! (' + videos.length + ' total)');
   }
 
   function removeVideo(i) {
+    const id = videos[i];
     videos.splice(i, 1);
+    saveVideos();
     renderVideoList();
+    addLog(`Removed video: ${id}`);
   }
 
   function clearVideos() {
     videos = [];
+    saveVideos();
     renderVideoList();
+    addLog('Cleared all videos');
     toast('🗑️ Cleared all videos');
+  }
+
+  function shuffleVideos() {
+    for (let i = videos.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [videos[i], videos[j]] = [videos[j], videos[i]];
+    }
+    saveVideos();
+    renderVideoList();
+    toast('🔀 Videos shuffled!', 'var(--accent3)');
+    addLog('Videos shuffled');
+  }
+
+  function shuffleAndRefresh() {
+    shuffleVideos();
+    if (running) { setTimeout(launchViewer, 100); }
+  }
+
+  function saveVideos() {
+    localStorage.setItem('wb_videos', JSON.stringify(videos));
+    document.getElementById('stat-videos').textContent = videos.length;
   }
 
   function renderVideoList() {
     const list = document.getElementById('video-list');
+    const strip = document.getElementById('thumb-strip');
     if (!videos.length) {
-      list.innerHTML = '<div style="color:var(--muted);font-size:0.7rem;font-family:\'Share Tech Mono\',monospace;text-align:center;padding:20px 0;">No videos added yet</div>';
+      list.innerHTML = '<div style="color:var(--muted);font-size:0.68rem;font-family:\'Share Tech Mono\',monospace;text-align:center;padding:16px 0;">No videos added yet</div>';
+      strip.innerHTML = '';
       return;
     }
     list.innerHTML = videos.map((id, i) => `
-      <div class="video-item">
+      <div class="video-item" draggable="true" ondragstart="dragStart(${i})" ondragover="dragOver(event,${i})" ondrop="dropVideo(${i})">
+        <span class="vid-drag">⠿</span>
         <span class="vid-num">${i+1}</span>
         <span class="vid-url">youtu.be/${id}</span>
         <button class="vid-remove" onclick="removeVideo(${i})">✕</button>
       </div>
     `).join('');
+
+    // Thumbnails
+    strip.innerHTML = videos.map((id, i) => `
+      <div class="thumb-item" onclick="previewVideo('${id}')">
+        <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy">
+        <button class="thumb-rm" onclick="event.stopPropagation();removeVideo(${i})">✕</button>
+      </div>
+    `).join('');
+
+    document.getElementById('stat-videos').textContent = videos.length;
   }
 
-  // PLAYLIST LOAD
+  // Drag-and-drop reordering
+  let dragIdx = null;
+  function dragStart(i) { dragIdx = i; }
+  function dragOver(e, i) { e.preventDefault(); }
+  function dropVideo(i) {
+    if (dragIdx === null || dragIdx === i) return;
+    const moved = videos.splice(dragIdx, 1)[0];
+    videos.splice(i, 0, moved);
+    dragIdx = null;
+    saveVideos();
+    renderVideoList();
+    toast('↕️ Video reordered', 'var(--muted)');
+  }
+
+  function previewVideo(id) {
+    toast(`🔍 Preview: youtu.be/${id}`, 'var(--accent3)');
+  }
+
+  // ═══════════════════════════════════════════════
+  // PLAYLIST MODE
+  // ═══════════════════════════════════════════════
   function loadPlaylist() {
     const input = document.getElementById('playlist-input').value.trim();
-    // Extract playlist ID
     let plId = input;
     const m = input.match(/[?&]list=([a-zA-Z0-9_-]+)/);
     if (m) plId = m[1];
-
     if (!plId) { toast('❌ Enter a valid playlist URL or ID', 'var(--accent)'); return; }
-
-    // Show some demo videos from the playlist ID (in real usage these come via API)
-    // We'll simulate loading by putting a YouTube playlist embed
     document.getElementById('playlist-preview').innerHTML = `
       <div class="section-title" style="margin-top:8px;">✅ Playlist Loaded</div>
       <div class="video-item"><span class="vid-num" style="color:var(--green)">PL</span><span class="vid-url">${plId}</span></div>
-      <div style="color:var(--muted);font-size:0.68rem;font-family:'Share Tech Mono',monospace;margin-top:6px;">Playlist will play in sequence across screens.</div>
+      <div style="color:var(--muted);font-size:0.65rem;font-family:'Share Tech Mono',monospace;margin-top:6px;">Will play in sequence across screens.</div>
     `;
-
-    // Generate playlist iframes for the grid
-    // We use the playlist embed directly
     videos = ['__PLAYLIST__' + plId];
+    saveVideos();
+    addLog(`Playlist loaded: ${plId}`);
     toast('✅ Playlist loaded! Click LAUNCH.');
   }
 
-  // CHANNEL/BULK URLs
+  // ═══════════════════════════════════════════════
+  // BULK LOAD
+  // ═══════════════════════════════════════════════
   function loadChannelURLs() {
     const raw = document.getElementById('channel-input').value;
     const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
@@ -928,138 +1314,194 @@
       const id = extractVideoId(url);
       if (id && !videos.includes(id)) { videos.push(id); added++; }
     });
+    saveVideos();
     renderVideoList();
+    addLog(`Bulk loaded ${added} videos`);
     toast(`✅ Loaded ${added} videos!`);
-    setMode('manual'); // show them in list
+    setMode('manual');
   }
 
+  // ═══════════════════════════════════════════════
   // GRID SIZE
+  // ═══════════════════════════════════════════════
   function setGrid(n) {
     gridSize = n;
     document.querySelectorAll('.grid-opt').forEach(el => el.classList.remove('selected'));
-    document.getElementById('g' + n).classList.add('selected');
+    const el = document.getElementById('g' + n);
+    if (el) el.classList.add('selected');
     document.getElementById('hdr-screens').textContent = n;
     document.getElementById('stat-screens').textContent = n;
+    addLog(`Grid set to ${n} screens`);
   }
 
+  // ═══════════════════════════════════════════════
   // BUILD EMBED URL
+  // ═══════════════════════════════════════════════
   function buildEmbed(videoId, mute = true) {
-    const origin = encodeURIComponent('https://www.youtube.com');
+    const origin = encodeURIComponent(location.origin || 'https://www.youtube.com');
     if (videoId && videoId.startsWith('__PLAYLIST__')) {
       const plId = videoId.replace('__PLAYLIST__', '');
       return `https://www.youtube-nocookie.com/embed/videoseries?list=${plId}&autoplay=1&mute=${mute?1:0}&loop=1&enablejsapi=1&rel=0&modestbranding=1&origin=${origin}`;
     }
     const loop = document.getElementById('tog-loop').checked ? 1 : 0;
-    return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${mute?1:0}&loop=${loop}&playlist=${videoId}&enablejsapi=1&rel=0&modestbranding=1&vq=${document.getElementById('quality-select').value}&origin=${origin}`;
+    const quality = document.getElementById('quality-select').value;
+    return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${mute?1:0}&loop=${loop}&playlist=${videoId}&enablejsapi=1&rel=0&modestbranding=1&vq=${quality}&origin=${origin}`;
   }
 
+  // ═══════════════════════════════════════════════
   // LAUNCH VIEWER
+  // ═══════════════════════════════════════════════
   function launchViewer() {
-    if (!videos.length) {
-      toast('⚠️ Add at least 1 video first!', 'var(--accent3)');
-      return;
-    }
-
+    if (!videos.length) { toast('⚠️ Add at least 1 video first!', 'var(--accent3)'); return; }
     const grid = document.getElementById('video-grid');
     const mute = document.getElementById('tog-mute').checked;
-
-    // Set grid class
+    const showLabels = document.getElementById('tog-labels').checked;
     grid.className = 'video-grid g' + gridSize;
 
-    // Fill cells
     let html = '';
     for (let i = 0; i < gridSize; i++) {
       const vid = videos[i % videos.length];
       html += `
         <div class="vid-cell">
-          <div class="vid-label">SCREEN ${i+1}</div>
+          ${showLabels ? `<div class="vid-label">SCREEN ${i+1}</div>` : ''}
           <iframe src="${buildEmbed(vid, mute)}"
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-            allowfullscreen
-            referrerpolicy="origin"
-            loading="lazy">
+            allowfullscreen referrerpolicy="origin" loading="lazy">
           </iframe>
+          <button class="vid-overlay-btn" onclick="openCellFullscreen(${i})">⛶</button>
         </div>`;
     }
     grid.innerHTML = html;
 
-    // Start timer
-    running = true;
-    document.getElementById('hdr-status').textContent = 'LIVE';
-    document.getElementById('hdr-screens').textContent = gridSize;
-    if (!timerInterval) {
-      timerInterval = setInterval(tickTimer, 1000);
+    if (!running) {
+      running = true;
+      sessionSeconds = 0;
+      totalSessions++;
+      localStorage.setItem('wb_sessions', totalSessions);
+      document.getElementById('stat-sessions').textContent = totalSessions;
+      document.getElementById('hdr-status').textContent = 'LIVE';
+      if (!timerInterval) timerInterval = setInterval(tickTimer, 1000);
+      addLog(`Session #${totalSessions} started — ${gridSize} screens`);
+    } else {
+      addLog('Viewer refreshed');
     }
-    toast('🚀 WatchBoost ACTIVE — ' + gridSize + ' screens running!', 'var(--green)');
+    document.getElementById('hdr-screens').textContent = gridSize;
+    toast('🚀 WatchBoost ACTIVE — ' + gridSize + ' screens!', 'var(--green)');
   }
 
-  // STOP ALL
+  // ═══════════════════════════════════════════════
+  // STOP
+  // ═══════════════════════════════════════════════
   function stopAll() {
+    if (!running) return;
     running = false;
     clearInterval(timerInterval);
     timerInterval = null;
     document.getElementById('hdr-status').textContent = 'STOPPED';
+
+    const addedHours = sessionSeconds / 3600 * gridSize * speedMultiplier;
+    savedHours += addedHours;
+    localStorage.setItem('wb_total_hours', savedHours.toString());
+
+    // Save to daily history
+    const today = new Date().toISOString().slice(0,10);
+    dailyHistory[today] = (dailyHistory[today] || 0) + addedHours;
+    localStorage.setItem('wb_daily', JSON.stringify(dailyHistory));
+    drawHistoryChart();
 
     const grid = document.getElementById('video-grid');
     grid.className = 'video-grid g1';
     grid.innerHTML = `<div class="vid-cell"><div class="vid-cell-placeholder">
       <div class="slot-num">⏹</div>
       <div>SESSION STOPPED</div>
-      <div style="color:var(--green);font-size:0.7rem;margin-top:8px;">TOTAL: ${formatTime(sessionSeconds)} WATCHED</div>
+      <div style="color:var(--green);font-size:0.65rem;margin-top:8px;">+${addedHours.toFixed(3)}h BANKED THIS SESSION</div>
+      <div style="color:var(--muted);font-size:0.6rem;margin-top:4px;">TOTAL: ${formatTime(sessionSeconds)} WATCHED</div>
     </div></div>`;
 
-    // Save progress
-    const addedHours = sessionSeconds / 3600 * gridSize;
-    savedHours += addedHours;
-    localStorage.setItem('wb_total_hours', savedHours.toString());
-    toast('✅ Session saved! +' + (addedHours).toFixed(2) + 'h banked', 'var(--green)');
+    addLog(`Session ended — +${addedHours.toFixed(3)}h banked`);
+    toast('✅ Session saved! +' + addedHours.toFixed(3) + 'h banked', 'var(--green)');
     updateProgress();
+    checkMilestones();
   }
 
-  // MUTE TOGGLE
+  // ═══════════════════════════════════════════════
+  // MUTE / REFRESH
+  // ═══════════════════════════════════════════════
   function muteToggle() {
-    const iframes = document.querySelectorAll('#video-grid iframe');
-    iframes.forEach(f => {
-      try {
-        f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-      } catch(e) {}
+    document.querySelectorAll('#video-grid iframe').forEach(f => {
+      try { f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*'); } catch(e) {}
     });
-    toast('🔇 Mute command sent to all screens');
+    toast('🔇 Mute command sent');
+    addLog('Mute toggled');
   }
 
-  // REFRESH
   function refreshAll() {
-    if (running) launchViewer();
+    if (running) { launchViewer(); addLog('All screens refreshed'); }
+    else { toast('⚠️ Start a session first', 'var(--accent3)'); }
   }
 
+  // ═══════════════════════════════════════════════
+  // SPEED MULTIPLIER
+  // ═══════════════════════════════════════════════
+  function setSpeed(n, el) {
+    speedMultiplier = n;
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    toast(`⚡ Speed set to ${n}×`, 'var(--purple)');
+    addLog(`Speed multiplier set to ${n}×`);
+  }
+
+  // ═══════════════════════════════════════════════
   // TIMER
+  // ═══════════════════════════════════════════════
   function tickTimer() {
     if (!running) return;
     sessionSeconds++;
 
-    const totalMins = (sessionSeconds * gridSize) / 60;
+    const totalMins = (sessionSeconds * gridSize * speedMultiplier) / 60;
     const totalHours = totalMins / 60;
     const totalSavedHours = savedHours + totalHours;
     const pct = Math.min((totalSavedHours / GOAL_HOURS) * 100, 100);
 
-    // Header
     document.getElementById('watch-timer').textContent = formatTime(sessionSeconds);
     document.getElementById('hdr-watchtime').textContent = Math.floor(sessionSeconds / 60) + ' MIN';
 
     const remaining = Math.max(GOAL_HOURS - totalSavedHours, 0);
     const rh = Math.floor(remaining);
     const rm = Math.floor((remaining - rh) * 60);
-    document.getElementById('hdr-remaining').textContent = rh + ':' + String(rm).padStart(2,'0');
+    document.getElementById('hdr-remaining').textContent = rh + 'h ' + String(rm).padStart(2,'0') + 'm';
 
-    // Progress
+    // ETA calculation
+    if (totalHours > 0 && remaining > 0) {
+      const ratePerHour = totalHours / (sessionSeconds / 3600);
+      const etaHours = remaining / ratePerHour;
+      const etaDays = etaHours / 24;
+      document.getElementById('hdr-eta').textContent = etaDays > 1 ? etaDays.toFixed(1) + 'd' : etaHours.toFixed(1) + 'h';
+    }
+
     document.getElementById('prog-fill').style.width = pct + '%';
     document.getElementById('prog-pct').textContent = pct.toFixed(3) + '%';
-
-    // Stats
     document.getElementById('stat-minutes').textContent = Math.floor(sessionSeconds / 60);
     document.getElementById('stat-screens').textContent = gridSize;
     document.getElementById('stat-multiplied').textContent = Math.floor(totalMins);
     document.getElementById('stat-progress').textContent = pct.toFixed(2) + '%';
+
+    // Check schedules
+    checkSchedules();
+
+    // Auto-rotate
+    const tog = document.getElementById('tog-rotate').checked;
+    if (tog) {
+      const mins = parseInt(document.getElementById('rotate-interval').value) || 30;
+      if (sessionSeconds > 0 && sessionSeconds % (mins * 60) === 0) {
+        const first = videos.shift();
+        videos.push(first);
+        saveVideos();
+        launchViewer();
+        toast('🔄 Videos rotated!', 'var(--accent3)');
+        addLog('Videos auto-rotated');
+      }
+    }
   }
 
   function formatTime(secs) {
@@ -1074,32 +1516,374 @@
     document.getElementById('prog-fill').style.width = pct + '%';
     document.getElementById('prog-pct').textContent = pct.toFixed(3) + '%';
     document.getElementById('stat-progress').textContent = pct.toFixed(2) + '%';
+    const remaining = Math.max(GOAL_HOURS - savedHours, 0);
+    document.getElementById('hdr-remaining').textContent = Math.floor(remaining) + 'h';
+    document.getElementById('goal-label-display').textContent = GOAL_LABEL;
   }
 
-  // URL input Enter key
+  // ═══════════════════════════════════════════════
+  // MILESTONES
+  // ═══════════════════════════════════════════════
+  const MILESTONES = [
+    { hours: 100, label: 'First 100h' },
+    { hours: 500, label: '500h Mark' },
+    { hours: 1000, label: '1000h Milestone' },
+    { hours: 2000, label: 'Halfway Point' },
+    { hours: 3000, label: '3000h Club' },
+    { hours: 4000, label: '🎉 GOAL REACHED!' },
+  ];
+
+  function renderMilestones() {
+    const list = document.getElementById('milestone-list');
+    list.innerHTML = MILESTONES.map(ms => {
+      const achieved = savedHours >= ms.hours;
+      return `<div class="milestone-item ${achieved ? 'achieved' : ''}">
+        <span class="ms-check">${achieved ? '✅' : '⬜'}</span>
+        <span class="ms-label">${ms.label}</span>
+        <span class="ms-hours">${ms.hours}h</span>
+      </div>`;
+    }).join('');
+  }
+
+  function checkMilestones() {
+    MILESTONES.forEach(ms => {
+      const key = 'wb_ms_' + ms.hours;
+      if (savedHours >= ms.hours && !localStorage.getItem(key)) {
+        localStorage.setItem(key, '1');
+        toast('🏆 MILESTONE: ' + ms.label, 'var(--accent3)', 5000);
+        addLog('🏆 Milestone reached: ' + ms.label);
+      }
+    });
+    renderMilestones();
+  }
+
+  // ═══════════════════════════════════════════════
+  // GOAL MODAL
+  // ═══════════════════════════════════════════════
+  function openGoalModal() {
+    document.getElementById('goal-input').value = GOAL_HOURS;
+    document.getElementById('goal-label-input').value = GOAL_LABEL;
+    document.getElementById('hours-adjust').value = savedHours.toFixed(2);
+    document.getElementById('goal-modal').classList.add('show');
+  }
+  function closeGoalModal() {
+    document.getElementById('goal-modal').classList.remove('show');
+  }
+  function saveGoal() {
+    const newGoal = parseFloat(document.getElementById('goal-input').value);
+    const newLabel = document.getElementById('goal-label-input').value || (newGoal + ' HOUR GOAL PROGRESS');
+    const newHours = parseFloat(document.getElementById('hours-adjust').value);
+    if (isNaN(newGoal) || newGoal < 1) { toast('❌ Invalid goal value', 'var(--accent)'); return; }
+    GOAL_HOURS = newGoal;
+    GOAL_LABEL = newLabel;
+    localStorage.setItem('wb_goal', GOAL_HOURS);
+    localStorage.setItem('wb_goal_label', GOAL_LABEL);
+    if (!isNaN(newHours)) {
+      savedHours = newHours;
+      localStorage.setItem('wb_total_hours', savedHours.toString());
+    }
+    updateProgress();
+    renderMilestones();
+    closeGoalModal();
+    addLog(`Goal updated to ${GOAL_HOURS}h`);
+    toast('✅ Goal saved!', 'var(--green)');
+  }
+
+  // ═══════════════════════════════════════════════
+  // SCHEDULE
+  // ═══════════════════════════════════════════════
+  function openScheduleModal() {
+    document.getElementById('schedule-modal').classList.add('show');
+  }
+  function closeScheduleModal() {
+    document.getElementById('schedule-modal').classList.remove('show');
+  }
+  function addSchedule() {
+    const time = document.getElementById('sch-time-input').value.trim();
+    const action = document.getElementById('sch-action-input').value;
+    if (!/^\d{2}:\d{2}$/.test(time)) { toast('❌ Invalid time (HH:MM)', 'var(--accent)'); return; }
+    schedules.push({ time, action });
+    localStorage.setItem('wb_schedules', JSON.stringify(schedules));
+    renderSchedules();
+    closeScheduleModal();
+    addLog(`Schedule added: ${action} at ${time}`);
+    toast(`✅ Schedule: ${action} at ${time}`, 'var(--accent3)');
+  }
+  function removeSchedule(i) {
+    schedules.splice(i, 1);
+    localStorage.setItem('wb_schedules', JSON.stringify(schedules));
+    renderSchedules();
+  }
+  function renderSchedules() {
+    const list = document.getElementById('schedule-list');
+    if (!schedules.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:0.68rem;font-family:\'Share Tech Mono\',monospace;text-align:center;padding:12px 0;">No schedules set</div>';
+      return;
+    }
+    const actions = { start:'🟢 Auto-Start', stop:'🔴 Auto-Stop', rotate:'🔄 Rotate', refresh:'↺ Refresh' };
+    list.innerHTML = schedules.map((s, i) => `
+      <div class="schedule-item">
+        <span class="sch-time">${s.time}</span>
+        <span class="sch-action">${actions[s.action] || s.action}</span>
+        <button class="sch-rm" onclick="removeSchedule(${i})">✕</button>
+      </div>
+    `).join('');
+  }
+  function checkSchedules() {
+    const now = new Date();
+    const t = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    if (now.getSeconds() !== 0) return;
+    schedules.forEach(s => {
+      if (s.time === t) {
+        if (s.action === 'start' && !running) { launchViewer(); addLog('⏰ Schedule triggered: auto-start'); }
+        else if (s.action === 'stop' && running) { stopAll(); addLog('⏰ Schedule triggered: auto-stop'); }
+        else if (s.action === 'rotate') { shuffleAndRefresh(); addLog('⏰ Schedule triggered: rotate'); }
+        else if (s.action === 'refresh') { refreshAll(); addLog('⏰ Schedule triggered: refresh'); }
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════════════
+  // EXPORT / IMPORT
+  // ═══════════════════════════════════════════════
+  function openExportModal() {
+    document.getElementById('export-area').value = JSON.stringify(videos, null, 2);
+    document.getElementById('export-modal').classList.add('show');
+  }
+  function copyExport() {
+    const text = document.getElementById('export-area').value;
+    navigator.clipboard.writeText(text).then(() => toast('📋 Copied to clipboard!', 'var(--green)')).catch(() => toast('❌ Copy failed', 'var(--accent)'));
+  }
+  function importVideos() {
+    try {
+      const data = JSON.parse(document.getElementById('import-area').value);
+      if (!Array.isArray(data)) throw new Error();
+      let added = 0;
+      data.forEach(id => {
+        if (typeof id === 'string' && /^[a-zA-Z0-9_-]{11}$/.test(id) && !videos.includes(id)) {
+          videos.push(id); added++;
+        }
+      });
+      saveVideos();
+      renderVideoList();
+      document.getElementById('export-modal').classList.remove('show');
+      addLog(`Imported ${added} videos`);
+      toast(`✅ Imported ${added} videos!`, 'var(--green)');
+    } catch(e) {
+      toast('❌ Invalid JSON format', 'var(--accent)');
+    }
+  }
+
+  // ═══════════════════════════════════════════════
+  // FULLSCREEN
+  // ═══════════════════════════════════════════════
+  function toggleFullscreen() {
+    if (!videos.length) { toast('⚠️ Add videos first!', 'var(--accent3)'); return; }
+    const overlay = document.getElementById('fs-overlay');
+    const fsGrid = document.getElementById('fs-grid');
+    overlay.classList.add('show');
+    fsGrid.className = 'fs-grid g' + gridSize;
+    fsGrid.style.cssText = '';
+
+    // Set grid CSS inline for fullscreen
+    const cols = gridSize === 1 ? 1 : gridSize === 2 ? 2 : gridSize === 3 ? 3 : gridSize === 4 ? 2 : gridSize === 6 ? 3 : gridSize === 9 ? 3 : gridSize === 16 ? 4 : 5;
+    fsGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+    const mute = document.getElementById('tog-mute').checked;
+    let html = '';
+    for (let i = 0; i < gridSize; i++) {
+      const vid = videos[i % videos.length];
+      html += `<div style="position:relative;background:#000;overflow:hidden;border:1px solid #1a2540;">
+        <iframe src="${buildEmbed(vid, mute)}" style="width:100%;height:100%;border:none;" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+      </div>`;
+    }
+    fsGrid.innerHTML = html;
+
+    // Try native fullscreen
+    try { overlay.requestFullscreen && overlay.requestFullscreen(); } catch(e) {}
+    addLog('Fullscreen viewer opened');
+  }
+  function exitFullscreen() {
+    document.getElementById('fs-overlay').classList.remove('show');
+    document.getElementById('fs-grid').innerHTML = '';
+    try { document.exitFullscreen && document.exitFullscreen(); } catch(e) {}
+    addLog('Fullscreen exited');
+  }
+  function openCellFullscreen(i) {
+    // Open single cell in fullscreen
+    const vid = videos[i % videos.length];
+    const mute = document.getElementById('tog-mute').checked;
+    const overlay = document.getElementById('fs-overlay');
+    const fsGrid = document.getElementById('fs-grid');
+    overlay.classList.add('show');
+    fsGrid.style.gridTemplateColumns = '1fr';
+    fsGrid.innerHTML = `<div style="position:relative;background:#000;overflow:hidden;">
+      <iframe src="${buildEmbed(vid, mute)}" style="width:100%;height:100%;border:none;" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+    </div>`;
+    try { overlay.requestFullscreen && overlay.requestFullscreen(); } catch(e) {}
+  }
+
+  // ═══════════════════════════════════════════════
+  // THEME
+  // ═══════════════════════════════════════════════
+  function setTheme(color, el) {
+    document.documentElement.style.setProperty('--accent', color);
+    const r = parseInt(color.slice(1,3),16);
+    const g = parseInt(color.slice(3,5),16);
+    const b = parseInt(color.slice(5,7),16);
+    document.documentElement.style.setProperty('--glow', `0 0 20px rgba(${r},${g},${b},0.4)`);
+    document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    localStorage.setItem('wb_theme', color);
+    addLog(`Theme changed to ${color}`);
+  }
+
+  function toggleDarkGap() {
+    const dark = document.getElementById('tog-darkgap').checked;
+    document.getElementById('video-grid').style.background = dark ? '#000' : '';
+    document.getElementById('fs-grid').style.background = dark ? '#000' : '';
+  }
+
+  // ═══════════════════════════════════════════════
+  // NOTES
+  // ═══════════════════════════════════════════════
+  function saveNotes() {
+    localStorage.setItem('wb_notes', document.getElementById('user-notes').value);
+  }
+
+  // ═══════════════════════════════════════════════
+  // RESET PROGRESS
+  // ═══════════════════════════════════════════════
+  function resetProgress() {
+    if (!confirm('⚠️ Reset ALL progress? This cannot be undone.')) return;
+    savedHours = 0;
+    totalSessions = 0;
+    localStorage.setItem('wb_total_hours', '0');
+    localStorage.setItem('wb_sessions', '0');
+    MILESTONES.forEach(ms => localStorage.removeItem('wb_ms_' + ms.hours));
+    updateProgress();
+    renderMilestones();
+    document.getElementById('stat-sessions').textContent = 0;
+    addLog('Progress reset');
+    toast('🔄 Progress reset', 'var(--accent3)');
+  }
+
+  // ═══════════════════════════════════════════════
+  // MINI HISTORY CHART
+  // ═══════════════════════════════════════════════
+  function drawHistoryChart() {
+    const canvas = document.getElementById('history-chart');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.offsetWidth || 280;
+    const H = canvas.offsetHeight || 60;
+    canvas.width = W;
+    canvas.height = H;
+
+    const days = 14;
+    const labels = [];
+    const values = [];
+    const now = new Date();
+    for (let i = days-1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0,10);
+      labels.push(key.slice(5));
+      values.push(dailyHistory[key] || 0);
+    }
+    const max = Math.max(...values, 0.1);
+    ctx.clearRect(0,0,W,H);
+
+    const barW = (W - 20) / days;
+    values.forEach((v, i) => {
+      const x = 10 + i * barW + 2;
+      const h = Math.max(2, (v / max) * (H - 12));
+      const y = H - h - 2;
+      ctx.fillStyle = v > 0 ? 'rgba(0,212,255,0.7)' : 'rgba(26,37,64,0.5)';
+      ctx.fillRect(x, y, barW - 4, h);
+    });
+
+    // Draw line
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,0,51,0.5)';
+    ctx.lineWidth = 1.5;
+    values.forEach((v, i) => {
+      const x = 10 + i * barW + barW/2;
+      const y = H - 2 - Math.max(2, (v / max) * (H - 12));
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  // ═══════════════════════════════════════════════
+  // MODAL BACKDROP CLOSE
+  // ═══════════════════════════════════════════════
+  function closeModal(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+      e.target.classList.remove('show');
+    }
+  }
+
+  // ═══════════════════════════════════════════════
+  // KEYBOARD SHORTCUTS
+  // ═══════════════════════════════════════════════
+  document.addEventListener('keydown', e => {
+    // Don't fire when typing in inputs
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    switch(e.key) {
+      case ' ': e.preventDefault(); running ? stopAll() : launchViewer(); break;
+      case 'f': case 'F': toggleFullscreen(); break;
+      case 'r': case 'R': refreshAll(); break;
+      case 'm': case 'M': muteToggle(); break;
+      case 's': case 'S': shuffleVideos(); break;
+      case 'Escape':
+        if (document.getElementById('fs-overlay').classList.contains('show')) exitFullscreen();
+        document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+        break;
+      case '1': setGrid(1); break;
+      case '2': setGrid(2); break;
+      case '3': setGrid(3); break;
+      case '4': setGrid(4); break;
+      case '6': setGrid(6); break;
+      case '9': setGrid(9); break;
+    }
+  });
+
+  // Enter key in URL input
   document.getElementById('url-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') addVideoURL();
   });
 
-  // Init
-  updateProgress();
-  document.getElementById('hdr-remaining').textContent =
-    Math.floor(GOAL_HOURS - savedHours) + ':00';
-
-  // Auto-rotate logic
-  setInterval(() => {
-    if (!running) return;
-    const tog = document.getElementById('tog-rotate').checked;
-    if (!tog) return;
-    const mins = parseInt(document.getElementById('rotate-interval').value) || 30;
-    if (sessionSeconds > 0 && sessionSeconds % (mins * 60) === 0) {
-      // rotate videos
-      const first = videos.shift();
-      videos.push(first);
-      launchViewer();
-      toast('🔄 Videos rotated!', 'var(--accent3)');
+  // ═══════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════
+  (function init() {
+    // Restore theme
+    const savedTheme = localStorage.getItem('wb_theme');
+    if (savedTheme) {
+      const dot = document.querySelector(`.theme-dot[style*="${savedTheme}"]`);
+      if (dot) setTheme(savedTheme, dot);
     }
-  }, 1000);
+
+    // Restore notes
+    document.getElementById('user-notes').value = localStorage.getItem('wb_notes') || '';
+
+    // Restore stat-sessions
+    document.getElementById('stat-sessions').textContent = totalSessions;
+
+    // Render everything
+    updateProgress();
+    renderVideoList();
+    renderSchedules();
+    renderMilestones();
+    drawHistoryChart();
+
+    // HQ stats
+    document.getElementById('stat-screens').textContent = gridSize;
+    document.getElementById('stat-videos').textContent = videos.length;
+
+    addLog('WatchBoost v2 initialized');
+    toast('🚀 WatchBoost v2 loaded!', 'var(--green)', 2000);
+  })();
 </script>
 </body>
 </html>
