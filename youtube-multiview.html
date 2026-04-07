@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YT WatchBoost — MultiView Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --panel: #0a0f1e;
+    --card: #0d1428;
+    --border: #1a2540;
+    --accent: #ff0033;
+    --accent2: #00d4ff;
+    --accent3: #ffcc00;
+    --green: #00ff88;
+    --text: #e0e8ff;
+    --muted: #4a5580;
+    --glow: 0 0 20px rgba(255,0,51,0.4);
+    --glow2: 0 0 20px rgba(0,212,255,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    animation: scan 4s linear infinite;
+    z-index: 1;
+    opacity: 0.5;
+  }
+  @keyframes scan { from { top: 0; } to { top: 100vh; } }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 18px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,8,16,0.9);
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+  }
+  .logo span:first-child { color: var(--accent); }
+  .logo span:last-child { color: var(--accent2); }
+
+  .status-bar {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-pill .label { color: var(--muted); }
+  .stat-pill .value { color: var(--green); font-weight: 700; }
+
+  .dot-live {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+  }
+
+  /* MAIN LAYOUT */
+  .app {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: calc(100vh - 65px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: var(--bg); }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* TABS */
+  .tab-row {
+    display: flex;
+    gap: 2px;
+    background: var(--bg);
+    padding: 3px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: var(--glow);
+  }
+
+  /* INPUTS */
+  label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent2);
+    box-shadow: var(--glow2);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    width: 100%;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: var(--glow);
+  }
+  .btn-primary:hover { background: #ff3355; transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+  }
+  .btn-secondary:hover { background: rgba(0,212,255,0.1); box-shadow: var(--glow2); }
+  .btn-success {
+    background: var(--green);
+    color: #000;
+  }
+  .btn-success:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-sm {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 0.6rem;
+  }
+
+  /* GRID SELECTOR */
+  .grid-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .grid-opt {
+    aspect-ratio: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.6rem;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.2s;
+    padding: 8px 4px;
+  }
+  .grid-opt:hover { border-color: var(--accent2); color: var(--accent2); }
+  .grid-opt.selected { border-color: var(--accent); color: var(--accent); background: rgba(255,0,51,0.08); box-shadow: var(--glow); }
+  .grid-icon {
+    display: grid;
+    gap: 2px;
+    width: 24px; height: 24px;
+  }
+  .grid-icon div {
+    background: currentColor;
+    border-radius: 1px;
+  }
+
+  /* VIDEO LIST */
+  .video-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .video-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .video-item .vid-num {
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 20px;
+  }
+  .video-item .vid-url {
+    flex: 1;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .video-item .vid-remove {
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    background: none;
+    border: none;
+    transition: color 0.2s;
+  }
+  .video-item .vid-remove:hover { color: var(--accent); }
+
+  /* SETTINGS */
+  .settings-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .toggle {
+    position: relative;
+    width: 36px; height: 20px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  .toggle input:checked ~ .toggle-track { background: var(--accent); }
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle input:checked ~ .toggle-track .toggle-thumb { transform: translateX(16px); }
+
+  /* VIEWER AREA */
+  .viewer {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .viewer-toolbar {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .watch-timer {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--accent2);
+    letter-spacing: 3px;
+    text-shadow: var(--glow2);
+  }
+
+  .hour-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .progress-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .progress-bar {
+    width: 200px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 3px;
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .progress-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent3);
+    text-align: right;
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* VIDEO GRID */
+  .video-grid {
+    flex: 1;
+    display: grid;
+    gap: 4px;
+    padding: 4px;
+    overflow: hidden;
+  }
+
+  .video-grid.g1 { grid-template-columns: 1fr; }
+  .video-grid.g2 { grid-template-columns: 1fr 1fr; }
+  .video-grid.g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .video-grid.g4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .video-grid.g6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; }
+  .video-grid.g9 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+
+  .vid-cell {
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .vid-cell iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .vid-cell-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+  }
+  .vid-cell-placeholder .slot-num {
+    font-size: 2rem;
+    color: var(--border);
+    font-weight: 900;
+  }
+  .vid-label {
+    position: absolute;
+    top: 6px; left: 6px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--accent2);
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* NOTIFICATIONS */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--card);
+    border: 1px solid var(--accent2);
+    box-shadow: var(--glow2);
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent2);
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* STATS PANEL */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .stat-card .s-val {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .stat-card .s-lab {
+    font-size: 0.6rem;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* PLAYLIST MODE */
+  .playlist-area {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .playlist-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: grab;
+    transition: border-color 0.2s;
+    font-size: 0.72rem;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .playlist-item:hover { border-color: var(--accent2); }
+  .playlist-item .pi-idx { color: var(--accent3); font-weight: 700; min-width: 24px; }
+  .playlist-item .pi-url { flex: 1; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .playlist-item .pi-status { color: var(--green); font-size: 0.65rem; }
+
+  .hidden { display: none !important; }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5,8,16,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 4px;
+  }
+  .spinner {
+    width: 30px; height: 30px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .sidebar { height: auto; max-height: 45vh; }
+    .status-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<header>
+  <div class="logo">
+    <span>YT</span><span>WATCH</span><span style="color:var(--accent3)">BOOST</span>
+  </div>
+  <div class="status-bar">
+    <div class="stat-pill">
+      <div class="dot-live"></div>
+      <span class="label">STATUS</span>
+      <span class="value" id="hdr-status">IDLE</span>
+    </div>
+    <div class="stat-pill">
+      <span class="label">SCREENS</span>
+      <span class="value" id="hdr-screens">0</span>
+    </div>
+    <div class="stat-pill">
+      <span class="label">WATCH TIME</span>
+      <span class="value" id="hdr-watchtime">0 MIN</span>
+    </div>
+    <div class="stat-pill">
+      <span class="label">TO 4000H</span>
+      <span class="value" id="hdr-remaining">4000:00</span>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- MODE TABS -->
+    <div>
+      <div class="section-title">⚡ Input Mode</div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="setMode('manual')" id="tab-manual">MANUAL</button>
+        <button class="tab-btn" onclick="setMode('playlist')" id="tab-playlist">PLAYLIST</button>
+        <button class="tab-btn" onclick="setMode('channel')" id="tab-channel">CHANNEL</button>
+      </div>
+    </div>
+
+    <!-- MANUAL MODE -->
+    <div id="mode-manual">
+      <div class="section-title">📹 Video URLs</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <input type="text" id="url-input" placeholder="YouTube URL or video ID..." style="flex:1;">
+        <button class="btn btn-secondary btn-sm" onclick="addVideoURL()">ADD</button>
+      </div>
+      <div class="video-list" id="video-list">
+        <div style="color:var(--muted);font-size:0.7rem;font-family:'Share Tech Mono',monospace;text-align:center;padding:20px 0;">
+          No videos added yet
+        </div>
+      </div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="clearVideos()">CLEAR ALL</button>
+    </div>
+
+    <!-- PLAYLIST MODE -->
+    <div id="mode-playlist" class="hidden">
+      <div class="section-title">📋 Playlist ID</div>
+      <label>YouTube Playlist URL or ID</label>
+      <input type="text" id="playlist-input" placeholder="PLxxxxxxxxxxxxxx or playlist URL">
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="loadPlaylist()">LOAD PLAYLIST</button>
+      <div id="playlist-preview" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- CHANNEL MODE -->
+    <div id="mode-channel" class="hidden">
+      <div class="section-title">📡 Channel Videos</div>
+      <label>Paste multiple URLs (one per line)</label>
+      <textarea id="channel-input" placeholder="https://youtu.be/xxxxx&#10;https://youtu.be/yyyyy&#10;https://youtu.be/zzzzz&#10;..."></textarea>
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="loadChannelURLs()">LOAD VIDEOS</button>
+    </div>
+
+    <!-- GRID LAYOUT -->
+    <div>
+      <div class="section-title">🎛️ Grid Layout</div>
+      <div class="grid-selector">
+        <div class="grid-opt selected" onclick="setGrid(1)" id="g1">
+          <div class="grid-icon" style="grid-template-columns:1fr;">
+            <div></div>
+          </div>
+          1×1
+        </div>
+        <div class="grid-opt" onclick="setGrid(2)" id="g2">
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr;">
+            <div></div><div></div>
+          </div>
+          1×2
+        </div>
+        <div class="grid-opt" onclick="setGrid(4)" id="g4">
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;">
+            <div></div><div></div><div></div><div></div>
+          </div>
+          2×2
+        </div>
+        <div class="grid-opt" onclick="setGrid(6)" id="g6">
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;">
+            <div></div><div></div><div></div><div></div><div></div><div></div>
+          </div>
+          2×3
+        </div>
+        <div class="grid-opt" onclick="setGrid(9)" id="g9">
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;">
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+          </div>
+          3×3
+        </div>
+        <div class="grid-opt" onclick="setGrid(3)" id="g3">
+          <div class="grid-icon" style="grid-template-columns:1fr 1fr 1fr;">
+            <div></div><div></div><div></div>
+          </div>
+          1×3
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div>
+      <div class="section-title">⚙️ Settings</div>
+      <div class="toggle-row">
+        <span>Autoplay</span>
+        <label class="toggle"><input type="checkbox" id="tog-autoplay" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+      </div>
+      <div class="toggle-row">
+        <span>Mute All</span>
+        <label class="toggle"><input type="checkbox" id="tog-mute" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+      </div>
+      <div class="toggle-row">
+        <span>Loop Videos</span>
+        <label class="toggle"><input type="checkbox" id="tog-loop"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+      </div>
+      <div class="toggle-row">
+        <span>Auto Rotate</span>
+        <label class="toggle"><input type="checkbox" id="tog-rotate"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+      </div>
+      <div style="margin-top:10px;">
+        <label>Rotate Interval (minutes)</label>
+        <input type="text" id="rotate-interval" value="30" placeholder="30">
+      </div>
+      <div style="margin-top:10px;">
+        <label>Quality Preference</label>
+        <select id="quality-select">
+          <option value="hd1080">1080p HD</option>
+          <option value="hd720">720p HD</option>
+          <option value="large" selected>480p</option>
+          <option value="medium">360p</option>
+          <option value="small">240p (fastest)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div>
+      <div class="section-title">📊 Session Stats</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="s-val" id="stat-minutes">0</div>
+          <div class="s-lab">MINUTES</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" id="stat-screens">0</div>
+          <div class="s-lab">SCREENS</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" id="stat-multiplied">0</div>
+          <div class="s-lab">TOTAL MINS</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-val" id="stat-progress">0%</div>
+          <div class="s-lab">4000H GOAL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAUNCH -->
+    <div>
+      <button class="btn btn-success" onclick="launchViewer()" id="launch-btn">▶ LAUNCH VIEWER</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="stopAll()" id="stop-btn">⏹ STOP ALL</button>
+    </div>
+
+  </aside>
+
+  <!-- VIEWER AREA -->
+  <main class="viewer">
+    <div class="viewer-toolbar">
+      <div class="toolbar-left">
+        <div class="watch-timer" id="watch-timer">00:00:00</div>
+        <div class="hour-progress">
+          <div class="progress-label">4000 HOUR GOAL PROGRESS</div>
+          <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+          <div class="progress-pct" id="prog-pct">0.00%</div>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="muteToggle()">🔇 MUTE</button>
+        <button class="btn btn-secondary btn-sm" onclick="refreshAll()">↺ REFRESH</button>
+        <button class="btn btn-primary btn-sm" onclick="launchViewer()">▶ START</button>
+      </div>
+    </div>
+    <div class="video-grid g1" id="video-grid">
+      <div class="vid-cell">
+        <div class="vid-cell-placeholder">
+          <div class="slot-num">▶</div>
+          <div>ADD VIDEOS & LAUNCH</div>
+          <div style="color:var(--border);font-size:0.6rem;">WATCHBOOST ENGINE READY</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // STATE
+  let videos = [];
+  let gridSize = 1;
+  let running = false;
+  let sessionSeconds = 0;
+  let timerInterval = null;
+  let savedHours = parseFloat(localStorage.getItem('wb_total_hours') || '0');
+  let currentMode = 'manual';
+
+  const GOAL_HOURS = 4000;
+
+  // TOAST
+  function toast(msg, color = 'var(--accent2)') {
+    const t = document.getElementById('toast');
+    t.style.borderColor = color;
+    t.style.color = color;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // MODE SWITCH
+  function setMode(mode) {
+    currentMode = mode;
+    ['manual','playlist','channel'].forEach(m => {
+      document.getElementById('mode-' + m).classList.toggle('hidden', m !== mode);
+      document.getElementById('tab-' + m).classList.toggle('active', m === mode);
+    });
+  }
+
+  // EXTRACT VIDEO ID
+  function extractVideoId(url) {
+    url = url.trim();
+    if (!url) return null;
+    // Already an ID
+    if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+    // youtu.be
+    let m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    // youtube.com/watch?v=
+    m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    // youtube.com/embed/
+    m = url.match(/embed\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    // youtube.com/shorts/
+    m = url.match(/shorts\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    return null;
+  }
+
+  // ADD VIDEO URL
+  function addVideoURL() {
+    const input = document.getElementById('url-input');
+    const id = extractVideoId(input.value);
+    if (!id) { toast('❌ Invalid YouTube URL!', 'var(--accent)'); return; }
+    if (videos.includes(id)) { toast('⚠️ Already added!', 'var(--accent3)'); return; }
+    videos.push(id);
+    input.value = '';
+    renderVideoList();
+    toast('✅ Video added! (' + videos.length + ' total)');
+  }
+
+  function removeVideo(i) {
+    videos.splice(i, 1);
+    renderVideoList();
+  }
+
+  function clearVideos() {
+    videos = [];
+    renderVideoList();
+    toast('🗑️ Cleared all videos');
+  }
+
+  function renderVideoList() {
+    const list = document.getElementById('video-list');
+    if (!videos.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:0.7rem;font-family:\'Share Tech Mono\',monospace;text-align:center;padding:20px 0;">No videos added yet</div>';
+      return;
+    }
+    list.innerHTML = videos.map((id, i) => `
+      <div class="video-item">
+        <span class="vid-num">${i+1}</span>
+        <span class="vid-url">youtu.be/${id}</span>
+        <button class="vid-remove" onclick="removeVideo(${i})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // PLAYLIST LOAD
+  function loadPlaylist() {
+    const input = document.getElementById('playlist-input').value.trim();
+    // Extract playlist ID
+    let plId = input;
+    const m = input.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+    if (m) plId = m[1];
+
+    if (!plId) { toast('❌ Enter a valid playlist URL or ID', 'var(--accent)'); return; }
+
+    // Show some demo videos from the playlist ID (in real usage these come via API)
+    // We'll simulate loading by putting a YouTube playlist embed
+    document.getElementById('playlist-preview').innerHTML = `
+      <div class="section-title" style="margin-top:8px;">✅ Playlist Loaded</div>
+      <div class="video-item"><span class="vid-num" style="color:var(--green)">PL</span><span class="vid-url">${plId}</span></div>
+      <div style="color:var(--muted);font-size:0.68rem;font-family:'Share Tech Mono',monospace;margin-top:6px;">Playlist will play in sequence across screens.</div>
+    `;
+
+    // Generate playlist iframes for the grid
+    // We use the playlist embed directly
+    videos = ['__PLAYLIST__' + plId];
+    toast('✅ Playlist loaded! Click LAUNCH.');
+  }
+
+  // CHANNEL/BULK URLs
+  function loadChannelURLs() {
+    const raw = document.getElementById('channel-input').value;
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    let added = 0;
+    lines.forEach(url => {
+      const id = extractVideoId(url);
+      if (id && !videos.includes(id)) { videos.push(id); added++; }
+    });
+    renderVideoList();
+    toast(`✅ Loaded ${added} videos!`);
+    setMode('manual'); // show them in list
+  }
+
+  // GRID SIZE
+  function setGrid(n) {
+    gridSize = n;
+    document.querySelectorAll('.grid-opt').forEach(el => el.classList.remove('selected'));
+    document.getElementById('g' + n).classList.add('selected');
+    document.getElementById('hdr-screens').textContent = n;
+    document.getElementById('stat-screens').textContent = n;
+  }
+
+  // BUILD EMBED URL
+  function buildEmbed(videoId, mute = true) {
+    const origin = encodeURIComponent('https://www.youtube.com');
+    if (videoId && videoId.startsWith('__PLAYLIST__')) {
+      const plId = videoId.replace('__PLAYLIST__', '');
+      return `https://www.youtube-nocookie.com/embed/videoseries?list=${plId}&autoplay=1&mute=${mute?1:0}&loop=1&enablejsapi=1&rel=0&modestbranding=1&origin=${origin}`;
+    }
+    const loop = document.getElementById('tog-loop').checked ? 1 : 0;
+    return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${mute?1:0}&loop=${loop}&playlist=${videoId}&enablejsapi=1&rel=0&modestbranding=1&vq=${document.getElementById('quality-select').value}&origin=${origin}`;
+  }
+
+  // LAUNCH VIEWER
+  function launchViewer() {
+    if (!videos.length) {
+      toast('⚠️ Add at least 1 video first!', 'var(--accent3)');
+      return;
+    }
+
+    const grid = document.getElementById('video-grid');
+    const mute = document.getElementById('tog-mute').checked;
+
+    // Set grid class
+    grid.className = 'video-grid g' + gridSize;
+
+    // Fill cells
+    let html = '';
+    for (let i = 0; i < gridSize; i++) {
+      const vid = videos[i % videos.length];
+      html += `
+        <div class="vid-cell">
+          <div class="vid-label">SCREEN ${i+1}</div>
+          <iframe src="${buildEmbed(vid, mute)}"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+            allowfullscreen
+            referrerpolicy="origin"
+            loading="lazy">
+          </iframe>
+        </div>`;
+    }
+    grid.innerHTML = html;
+
+    // Start timer
+    running = true;
+    document.getElementById('hdr-status').textContent = 'LIVE';
+    document.getElementById('hdr-screens').textContent = gridSize;
+    if (!timerInterval) {
+      timerInterval = setInterval(tickTimer, 1000);
+    }
+    toast('🚀 WatchBoost ACTIVE — ' + gridSize + ' screens running!', 'var(--green)');
+  }
+
+  // STOP ALL
+  function stopAll() {
+    running = false;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    document.getElementById('hdr-status').textContent = 'STOPPED';
+
+    const grid = document.getElementById('video-grid');
+    grid.className = 'video-grid g1';
+    grid.innerHTML = `<div class="vid-cell"><div class="vid-cell-placeholder">
+      <div class="slot-num">⏹</div>
+      <div>SESSION STOPPED</div>
+      <div style="color:var(--green);font-size:0.7rem;margin-top:8px;">TOTAL: ${formatTime(sessionSeconds)} WATCHED</div>
+    </div></div>`;
+
+    // Save progress
+    const addedHours = sessionSeconds / 3600 * gridSize;
+    savedHours += addedHours;
+    localStorage.setItem('wb_total_hours', savedHours.toString());
+    toast('✅ Session saved! +' + (addedHours).toFixed(2) + 'h banked', 'var(--green)');
+    updateProgress();
+  }
+
+  // MUTE TOGGLE
+  function muteToggle() {
+    const iframes = document.querySelectorAll('#video-grid iframe');
+    iframes.forEach(f => {
+      try {
+        f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+      } catch(e) {}
+    });
+    toast('🔇 Mute command sent to all screens');
+  }
+
+  // REFRESH
+  function refreshAll() {
+    if (running) launchViewer();
+  }
+
+  // TIMER
+  function tickTimer() {
+    if (!running) return;
+    sessionSeconds++;
+
+    const totalMins = (sessionSeconds * gridSize) / 60;
+    const totalHours = totalMins / 60;
+    const totalSavedHours = savedHours + totalHours;
+    const pct = Math.min((totalSavedHours / GOAL_HOURS) * 100, 100);
+
+    // Header
+    document.getElementById('watch-timer').textContent = formatTime(sessionSeconds);
+    document.getElementById('hdr-watchtime').textContent = Math.floor(sessionSeconds / 60) + ' MIN';
+
+    const remaining = Math.max(GOAL_HOURS - totalSavedHours, 0);
+    const rh = Math.floor(remaining);
+    const rm = Math.floor((remaining - rh) * 60);
+    document.getElementById('hdr-remaining').textContent = rh + ':' + String(rm).padStart(2,'0');
+
+    // Progress
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct.toFixed(3) + '%';
+
+    // Stats
+    document.getElementById('stat-minutes').textContent = Math.floor(sessionSeconds / 60);
+    document.getElementById('stat-screens').textContent = gridSize;
+    document.getElementById('stat-multiplied').textContent = Math.floor(totalMins);
+    document.getElementById('stat-progress').textContent = pct.toFixed(2) + '%';
+  }
+
+  function formatTime(secs) {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+
+  function updateProgress() {
+    const pct = Math.min((savedHours / GOAL_HOURS) * 100, 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct.toFixed(3) + '%';
+    document.getElementById('stat-progress').textContent = pct.toFixed(2) + '%';
+  }
+
+  // URL input Enter key
+  document.getElementById('url-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addVideoURL();
+  });
+
+  // Init
+  updateProgress();
+  document.getElementById('hdr-remaining').textContent =
+    Math.floor(GOAL_HOURS - savedHours) + ':00';
+
+  // Auto-rotate logic
+  setInterval(() => {
+    if (!running) return;
+    const tog = document.getElementById('tog-rotate').checked;
+    if (!tog) return;
+    const mins = parseInt(document.getElementById('rotate-interval').value) || 30;
+    if (sessionSeconds > 0 && sessionSeconds % (mins * 60) === 0) {
+      // rotate videos
+      const first = videos.shift();
+      videos.push(first);
+      launchViewer();
+      toast('🔄 Videos rotated!', 'var(--accent3)');
+    }
+  }, 1000);
+</script>
+</body>
+</html>
